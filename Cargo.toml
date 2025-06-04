@@ -1,0 +1,12 @@
+[package]
+name        = "kroos"
+version     = "0.0.1"
+edition     = "2024"
+description = "Flexible smart pointer for ?Sized types with customizable reference counting."
+authors     = [ "Kaffssist <maxpavez02@gmail.com>" ]
+repository  = "https://deepwiki.com/Pavez7274/kroos"
+license     = "GNU AGPL v3"
+keywords    = [ "smart-pointer", "reference-counting", "allocation", "heap", "ownership", "unsized", "unsafe" ]
+categories = [ "memory-management", "data-structures", "concurrency" ]
+
+[dependencies]
