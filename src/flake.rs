@@ -50,7 +50,10 @@ impl<T: Sized> Flake<T> {
         unsafe {
             let layout = Layout::new::<T>();
             let raw = alloc(layout);
-            if raw.is_null() { handle_alloc_error(layout) }
+            if raw.is_null() { 
+                dealloc(raw, layout);
+                handle_alloc_error(layout);
+            }
 
             write(raw as *mut T, value);
 
@@ -106,7 +109,10 @@ impl<T: ?Sized> Flake<T> {
         unsafe {
             let layout = Layout::for_value(value);
             let raw = alloc(layout);
-            if raw.is_null() { handle_alloc_error(layout); }
+            if raw.is_null() { 
+                dealloc(raw, layout);
+                handle_alloc_error(layout);
+            }
 
             copy_nonoverlapping(value as *const T as *const u8, raw, size_of_val(value));
 
@@ -203,6 +209,9 @@ impl<T: ?Sized + Hash> Hash for Flake<T> {
         unsafe { (&*self.inner_ptr).hash(state) }
     }
 }
+
+unsafe impl<T: ?Sized> Send for Flake<T> {}
+unsafe impl<T: ?Sized> Sync for Flake<T> {}
 
 #[cfg(test)]
 mod tests {

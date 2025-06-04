@@ -145,20 +145,21 @@ impl<C: Counter, T: Sized> Rime<C, T> {
     /// - For dynamically sized values, use [`Rime::new`] instead
     pub fn steal(value: T) -> Self {
         unsafe {
-            let t_size = size_of::<C>();
-            let d_size = size_of::<T>();
-            let align = align_of::<C>().max(align_of::<T>());
-            let layout = Layout::from_size_align_unchecked(t_size + d_size, align);
+            let c_size = size_of::<C>();
+            let layout = Layout::from_size_align_unchecked(
+                size_of::<T>() + c_size, 
+                align_of::<C>().max(align_of::<T>()));
 
             let raw = alloc(layout);
             if raw.is_null() {
+                dealloc(raw, layout);
                 handle_alloc_error(layout);
             }
 
             let counter_ptr = raw as *mut C;
             write(counter_ptr, C::new());
 
-            let data_ptr = raw.add(t_size) as *mut T;
+            let data_ptr = raw.add(c_size) as *mut T;
             write(data_ptr, value);
 
             Self::from_raw(counter_ptr, data_ptr as *const T)
@@ -223,22 +224,25 @@ impl<C: Counter, T: ?Sized> Rime<C, T> {
     /// ```
     pub fn new(value: &T) -> Self {
         unsafe {
-            let v_size = size_of_val(value);
-            let t_size = size_of::<C>();
+            let t_size = size_of_val(value);
+            let c_size = size_of::<C>();
 
             let layout = Layout::from_size_align_unchecked(
-                t_size + v_size,
+                c_size + t_size,
                 align_of::<C>().max(align_of_val(value))
             );
             
             let raw = alloc(layout);
-            if raw.is_null() { handle_alloc_error(layout); }
+            if raw.is_null() { 
+                dealloc(raw, layout);
+                handle_alloc_error(layout);
+            }
             
             let counter_ptr = raw as *mut C;
             write(counter_ptr, C::new());
 
-            let inner_ptr = raw.add(t_size);
-            copy_nonoverlapping(value as *const T as *const u8, inner_ptr, v_size);
+            let inner_ptr = raw.add(c_size);
+            copy_nonoverlapping(value as *const T as *const u8, inner_ptr, t_size);
 
             Self::from_raw_parts(counter_ptr, inner_ptr, metadata(value))
         }

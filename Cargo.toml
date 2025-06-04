@@ -1,6 +1,6 @@
 [package]
 name        = "kroos"
-version     = "0.0.1"
+version     = "0.0.1-b"
 edition     = "2024"
 description = "Flexible smart pointer for ?Sized types with customizable reference counting."
 authors     = [ "Kaffssist <maxpavez02@gmail.com>" ]
