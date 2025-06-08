@@ -55,7 +55,7 @@ macro_rules! impl_ref_count_for_atomic {
         $(
             impl Counter for $atomic {
                 #[inline(always)] fn new() -> Self { <$atomic>::new(1) }
-                #[inline(always)] fn increment(&mut self) { self.fetch_add(1, Ordering::Relaxed); }
+                #[inline(always)] fn increment(&mut self) { self.fetch_add(1, Ordering::Release); }
                 #[inline(always)] fn decrement(&mut self) -> bool {
                     if self.fetch_sub(1, Ordering::Release) == 1 {
                         fence(Ordering::Acquire); true 

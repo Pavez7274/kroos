@@ -218,6 +218,14 @@ mod tests {
     use super::Flake;
 
     #[test]
+    fn flake_as_bytes() {
+        let input: &str = "hello";
+        let flake = Flake::new(input);
+        assert_eq!(&*flake, "hello");
+        println!("{:?} {:?}", flake.len(), b"hello");
+    }
+
+    #[test]
     fn flake_from_str() {
         let input: &str = "hello";
         let flake = Flake::new(input);
